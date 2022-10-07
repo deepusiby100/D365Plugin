@@ -24,7 +24,7 @@ namespace D365Plugin
             }
             catch (Exception Ex)
             {
-                trace.Trace("Testing");
+                trace.Trace("Testing plugin");
             }
         }
 
