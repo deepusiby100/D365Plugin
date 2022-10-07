@@ -10,6 +10,25 @@ namespace D365Plugin
 {
     public class AccountUpdate : IPlugin
     {
+        IOrganizationService service;
+        IExecutionContext context;
+        ITracingService trace;
+        Entity currentEntity;
+        private void GetOrganizationService(IServiceProvider serviceProvider)
+        {
+            try
+            {
+                context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
+                service = ((IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory))).CreateOrganizationService(context.UserId);
+                trace = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
+            }
+            catch (Exception Ex)
+            {
+
+            }
+        }
+
+
         public void Execute(IServiceProvider serviceProvider)
         {
             throw new NotImplementedException();
