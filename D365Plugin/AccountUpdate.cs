@@ -26,9 +26,24 @@ namespace D365Plugin
                 if(context.InputParameters.Contains("Target") && context.InputParameters["Target"] is Entity)
                 {
                     Entity accountEntity = (Entity)context.InputParameters["Target"];
+                    
                     if(accountEntity.LogicalName.Equals("account"))
                     {
-                        if(accountEntity.Attributes.Contains(""))
+                        if (accountEntity.Attributes.Contains("ds_GroupCode"))
+                        {
+                            string fetchXml = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>"+
+  "<entity name='contact'>"+
+    "< attribute name='contactid' />"+
+    "< order attribute='fullname' descending='false' />"+
+    "< link-entity name='account' from='accountid' to='parentcustomerid' link-type='inner' alias='ac'>"+
+      "< filter type='and'>"+
+        "< condition attribute='accountid' operator='eq' uiname='Paracherry' uitype='account' value='{'" + accountEntity + "'}' />"+
+      "</filter>" +
+    "</link-entity>" +
+  "</entity>"+
+"</fetch>";
+                            EntityCollection ecContacts = service.RetrieveMultiple(new FetchExpression(fetchXml));
+                        }
                     }
                 };
             }
