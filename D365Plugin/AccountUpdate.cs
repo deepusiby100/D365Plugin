@@ -25,26 +25,39 @@ namespace D365Plugin
 
                 if(context.InputParameters.Contains("Target") && context.InputParameters["Target"] is Entity)
                 {
+                    Guid accountID;
                     Entity accountEntity = (Entity)context.InputParameters["Target"];
-                    
-                    if(accountEntity.LogicalName.Equals("account"))
+                                        
+                    if(accountEntity.LogicalName.Equals("account") && accountEntity != null)
                     {
-                        if (accountEntity.Attributes.Contains("ds_GroupCode"))
+                        accountID = accountEntity.GetAttributeValue<Guid>("accountid");
+                        string groupCode = accountEntity.GetAttributeValue<string>("ds_groupcode");
+                        if (accountEntity.Attributes.Contains("ds_groupcode"))
                         {
-                            string fetchXml = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>"+
-  "<entity name='contact'>"+
-    "< attribute name='contactid' />"+
-    "< order attribute='fullname' descending='false' />"+
-    "< link-entity name='account' from='accountid' to='parentcustomerid' link-type='inner' alias='ac'>"+
-      "< filter type='and'>"+
-        "< condition attribute='accountid' operator='eq' uiname='Paracherry' uitype='account' value='{'" + accountEntity + "'}' />"+
-      "</filter>" +
-    "</link-entity>" +
-  "</entity>"+
-"</fetch>";
-                            EntityCollection ecContacts = service.RetrieveMultiple(new FetchExpression(fetchXml));
+                            string fetchXml = @"<fetch mapping='logical'>
+  <entity name='contact'>
+    < attribute name='contactid' />
+    < order attribute='fullname' descending='false' />
+    < link-entity name='account' from='accountid' to='parentcustomerid' link-type='inner' alias='ac'>
+    < filter type='and'>
+    < condition attribute='accountid' operator='eq' value='" + accountID.ToString() + @"'/>
+    </filter>
+    </link-entity>
+    </entity>
+    </fetch>";
+
+                            FetchExpression fe = new FetchExpression(fetchXml);
+                            EntityCollection ecContacts = service.RetrieveMultiple(fe);
+                            string count = ecContacts.TotalRecordCount.ToString();
+                            foreach(var contact in ecContacts.Entities)
+                            {
+                                contact["ds_groupcode"] = groupCode;
+                                service.Update(contact);
+                            }
                         }
+                        
                     }
+                    
                 };
             }
             catch (InvalidPluginExecutionException IPE)
