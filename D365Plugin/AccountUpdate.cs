@@ -34,21 +34,20 @@ namespace D365Plugin
                         string groupCode = accountEntity.GetAttributeValue<string>("ds_groupcode");
                         if (accountEntity.Attributes.Contains("ds_groupcode"))
                         {
-                            string fetchXml = @"<fetch mapping='logical'>
-  <entity name='contact'>
-    < attribute name='contactid' />
-    < order attribute='fullname' descending='false' />
-    < link-entity name='account' from='accountid' to='parentcustomerid' link-type='inner' alias='ac'>
-    < filter type='and'>
-    < condition attribute='accountid' operator='eq' value='" + accountID.ToString() + @"'/>
-    </filter>
-    </link-entity>
-    </entity>
-    </fetch>";
+                            string fetchXml = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>" +
+  "<entity name='contact'>" +
+    "<attribute name='fullname' />" +
+    "<attribute name='contactid' />" +
+    "<order attribute='fullname' descending='false' />" +
+    "<filter type='and'>" +
+      "<condition attribute='parentcustomerid' operator='eq' value='{" + accountID + "}' />" +
+    "</filter>" +
+  "</entity>" +
+"</fetch>";
 
-                            FetchExpression fe = new FetchExpression(fetchXml);
+                                                     FetchExpression fe = new FetchExpression(fetchXml);
                             EntityCollection ecContacts = service.RetrieveMultiple(fe);
-                            string count = ecContacts.TotalRecordCount.ToString();
+                            int count = ecContacts.Entities.Count;
                             foreach(var contact in ecContacts.Entities)
                             {
                                 contact["ds_groupcode"] = groupCode;
