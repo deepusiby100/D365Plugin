@@ -53,8 +53,7 @@ namespace D365Plugin
                                 contact["ds_groupcode"] = groupCode;
                                 service.Update(contact);
                             }
-                        }
-                        
+                        }                        
                     }
                     
                 };
